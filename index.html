@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance System | Fingerprint Scanner</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #34495e;
+            --gray: #95a5a6;
+            --dark-blue: #1a2a3a;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--dark-blue), var(--primary));
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+        }
+
+        /* Header Styles */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            color: white;
+            font-weight: 600;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+        }
+
+        nav a {
+            color: var(--light);
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        nav a:hover, nav a.active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        nav a i {
+            margin-right: 8px;
+        }
+
+        /* Page Container */
+        .page-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            min-height: 600px;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            color: var(--light);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .page-title i {
+            color: var(--secondary);
+        }
+
+        /* Dashboard Styles */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .clock-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            grid-column: span 2;
+        }
+
+        .date-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .date-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 5px;
+        }
+
+        .date-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .time {
+            font-size: 2.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: var(--light);
+        }
+
+        .attendance-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .info-card {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            background: rgba(0, 0, 0, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .info-card i {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .info-title {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        .info-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .scanner-section {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            grid-row: span 2;
+        }
+
+        .fingerprint-scanner {
+            width: 220px;
+            height: 220px;
+            background: linear-gradient(135deg, #2c3e50, #1a2a3a);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            box-shadow: 
+                0 0 0 10px rgba(52, 152, 219, 0.1),
+                0 0 0 20px rgba(52, 152, 219, 0.05),
+                inset 0 0 30px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            margin: 20px 0;
+            transition: all 0.3s;
+        }
+
+        .fingerprint-scanner:hover {
+            transform: scale(1.03);
+            box-shadow: 
+                0 0 0 10px rgba(52, 152, 219, 0.2),
+                0 0 0 20px rgba(52, 152, 219, 0.1),
+                inset 0 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .fingerprint-scanner.active {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            animation: pulse 1.5s infinite;
+        }
+
+        .fingerprint-icon {
+            font-size: 90px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .fingerprint-scanner.active .fingerprint-icon {
+            color: white;
+        }
+
+        .scanner-instruction {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+        }
+
+        .scan-button {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+            font-weight: 600;
+            width: 100%;
+            max-width: 250px;
+        }
+
+        .scan-button:hover {
+            background: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.6);
+        }
+
+        .check-in-out {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            grid-column: span 2;
+        }
+
+        .check-btn {
+            flex: 1;
+            padding: 20px;
+            border-radius: 15px;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .check-btn i {
+            font-size: 1.8rem;
+        }
+
+        .check-in {
+            background: var(--success);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+        }
+
+        .check-out {
+            background: var(--danger);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        .check-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .check-btn:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.3);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Employees Page Styles */
+        .employee-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .employee-card {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .employee-card:hover {
+            transform: translateY(-5px);
+            background: rgba(0, 0, 0, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .employee-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .employee-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .employee-info h3 {
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+        }
+
+        .employee-id {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .employee-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .detail-item {
+            font-size: 0.95rem;
+        }
+
+        .detail-label {
+            color: var(--gray);
+            margin-bottom: 3px;
+        }
+
+        .employee-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .edit-btn {
+            background: rgba(52, 152, 219, 0.2);
+            color: var(--secondary);
+        }
+
+        .delete-btn {
+            background: rgba(231, 76, 60, 0.2);
+            color: var(--danger);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--dark);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-message {
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        .modal-btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .cancel-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+        }
+
+        .confirm-btn {
+            background: var(--danger);
+            color: white;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(52, 152, 219, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0); }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .scanner-section {
+                grid-row: auto;
+            }
+            
+            .clock-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .check-in-out {
+                flex-direction: column;
+            }
+            
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-fingerprint"></i>
+                </div>
+                <h1>Attendance System</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#" class="active" data-page="dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li><a href="#" data-page="employees"><i class="fas fa-users"></i> Employees</a></li>
+                    <li><a href="#" data-page="attendance"><i class="fas fa-history"></i> Records</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <div class="page-container">
+            <!-- Dashboard Page -->
+            <div id="dashboard-page" class="page">
+                <h2 class="page-title"><i class="fas fa-tachometer-alt"></i> Attendance Dashboard</h2>
+                
+                <div class="dashboard-grid">
+                    <div class="clock-container">
+                        <div class="date-display">
+                            <div class="date-label">Current Date</div>
+                            <div class="date-value" id="currentDate">June 14, 2024</div>
+                        </div>
+                        <div class="time" id="currentTime">11:45:22</div>
+                        <div class="date-display">
+                            <div class="date-label">Nepal Time</div>
+                            <div class="date-value" id="nepalTime">UTC+5:45</div>
+                        </div>
+                    </div>
+                    
+                    <div class="attendance-info">
+                        <div class="info-card">
+                            <i class="fas fa-clock" style="color: var(--secondary);"></i>
+                            <div class="info-title">Total Hours</div>
+                            <div class="info-value">8.2</div>
+                        </div>
+                        <div class="info-card">
+                            <i class="fas fa-business-time" style="color: var(--warning);"></i>
+                            <div class="info-title">Overtime</div>
+                            <div class="info-value">0.3</div>
+                        </div>
+                        <div class="info-card">
+                            <i class="fas fa-sign-in-alt" style="color: var(--success);"></i>
+                            <div class="info-title">Check-in Time</div>
+                            <div class="info-value">9:00</div>
+                        </div>
+                        <div class="info-card">
+                            <i class="fas fa-sign-out-alt" style="color: var(--danger);"></i>
+                            <div class="info-title">Check-out Time</div>
+                            <div class="info-value">17:12</div>
+                        </div>
+                    </div>
+                    
+                    <div class="scanner-section">
+                        <h3 class="scanner-title"><i class="fas fa-fingerprint"></i> Fingerprint Scanner</h3>
+                        <p class="scanner-instruction">Place your finger on the scanner to authenticate</p>
+                        
+                        <div class="fingerprint-scanner" id="scanner">
+                            <i class="fas fa-fingerprint fingerprint-icon"></i>
+                        </div>
+                        
+                        <p class="scanner-instruction">Or use the button below</p>
+                        <button class="scan-button" id="scanButton">
+                            <i class="fas fa-fingerprint"></i> Scan Fingerprint
+                        </button>
+                    </div>
+                    
+                    <div class="check-in-out">
+                        <button class="check-btn check-in" id="checkInBtn" disabled>
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>Check In</span>
+                        </button>
+                        <button class="check-btn check-out" id="checkOutBtn" disabled>
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Check Out</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Employees Page -->
+            <div id="employees-page" class="page" style="display: none;">
+                <h2 class="page-title"><i class="fas fa-users"></i> Employee Management</h2>
+                
+                <div class="employee-grid">
+                    <!-- Employee Cards will be inserted here by JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Attendance Records Page -->
+            <div id="attendance-page" class="page" style="display: none;">
+                <h2 class="page-title"><i class="fas fa-history"></i> Attendance Records</h2>
+                <p>Attendance records will be displayed here.</p>
+            </div>
+        </div>
+        
+        <!-- Delete Confirmation Modal -->
+        <div id="deleteModal" class="modal">
+            <div class="modal-content">
+                <h3 class="modal-title"><i class="fas fa-exclamation-triangle"></i> Confirm Deletion</h3>
+                <p class="modal-message" id="deleteMessage">Are you sure you want to delete this employee? This action cannot be undone.</p>
+                <div class="modal-actions">
+                    <button class="modal-btn cancel-btn" id="cancelDelete">Cancel</button>
+                    <button class="modal-btn confirm-btn" id="confirmDelete">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>© 2024 Attendance System with Fingerprint Scanner | All Rights Reserved</p>
+    </footer>
+
+    <script>
+        // Sample employee data
+        const employees = [
+            {
+                id: 1,
+                name: "Ram Bahadur",
+                position: "Manager",
+                department: "Administration",
+                employeeId: "EMP-001",
+                email: "ram@example.com",
+                phone: "+977 9841234567",
+                initials: "RB"
+            },
+            {
+                id: 2,
+                name: "Sita Sharma",
+                position: "Developer",
+                department: "IT",
+                employeeId: "EMP-002",
+                email: "sita@example.com",
+                phone: "+977 9852345678",
+                initials: "SS"
+            },
+            {
+                id: 3,
+                name: "Hari Prasad",
+                position: "Accountant",
+                department: "Finance",
+                employeeId: "EMP-003",
+                email: "hari@example.com",
+                phone: "+977 9863456789",
+                initials: "HP"
+            },
+            {
+                id: 4,
+                name: "Gita Thapa",
+                position: "HR Specialist",
+                department: "Human Resources",
+                employeeId: "EMP-004",
+                email: "gita@example.com",
+                phone: "+977 9874567890",
+                initials: "GT"
+            }
+        ];
+
+        // DOM Elements
+        const pages = {
+            dashboard: document.getElementById('dashboard-page'),
+            employees: document.getElementById('employees-page'),
+            attendance: document.getElementById('attendance-page')
+        };
+
+        const navLinks = document.querySelectorAll('nav a');
+        const scanner = document.getElementById('scanner');
+        const scanButton = document.getElementById('scanButton');
+        const checkInBtn = document.getElementById('checkInBtn');
+        const checkOutBtn = document.getElementById('checkOutBtn');
+        const currentDateEl = document.getElementById('currentDate');
+        const currentTimeEl = document.getElementById('currentTime');
+        const employeeGrid = document.querySelector('.employee-grid');
+        const deleteModal = document.getElementById('deleteModal');
+        const deleteMessage = document.getElementById('deleteMessage');
+        const cancelDelete = document.getElementById('cancelDelete');
+        const confirmDelete = document.getElementById('confirmDelete');
+
+        // Current employee to delete
+        let employeeToDelete = null;
+
+        // Initialize the application
+        function initApp() {
+            // Set up navigation
+            setupNavigation();
+            
+            // Initialize dashboard
+            initDashboard();
+            
+            // Initialize employee page
+            renderEmployees();
+            
+            // Set up modal events
+            setupModal();
+        }
+
+        // Set up navigation
+        function setupNavigation() {
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const page = link.getAttribute('data-page');
+                    
+                    // Update active link
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                    
+                    // Show selected page
+                    Object.values(pages).forEach(p => p.style.display = 'none');
+                    pages[page].style.display = 'block';
+                });
+            });
+        }
+
+        // Initialize dashboard
+        function initDashboard() {
+            // Update time and date
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+            
+            // Set up fingerprint scanner
+            scanner.addEventListener('click', scanFingerprint);
+            scanButton.addEventListener('click', scanFingerprint);
+            
+            // Set up check-in/out buttons
+            checkInBtn.addEventListener('click', checkIn);
+            checkOutBtn.addEventListener('click', checkOut);
+        }
+
+        // Update date and time
+        function updateDateTime() {
+            const now = new Date();
+            
+            // Adjust for Nepal time (UTC+5:45)
+            const nepalOffset = 5*60 + 45;
+            const localOffset = now.getTimezoneOffset();
+            const nepalTime = new Date(now.getTime() + (nepalOffset + localOffset)*60000);
+            
+            // Format date
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            currentDateEl.textContent = nepalTime.toLocaleDateString('en-US', options);
+            
+            // Format time
+            const hours = String(nepalTime.getHours()).padStart(2, '0');
+            const minutes = String(nepalTime.getMinutes()).padStart(2, '0');
+            const seconds = String(nepalTime.getSeconds()).padStart(2, '0');
+            currentTimeEl.textContent = `${hours}:${minutes}:${seconds}`;
+        }
+
+        // Scan fingerprint simulation
+        function scanFingerprint() {
+            scanner.classList.add('active');
+            scanButton.disabled = true;
+            
+            // Simulate scanning process
+            setTimeout(() => {
+                scanner.classList.remove('active');
+                scanButton.disabled = false;
+                
+                // 80% chance of successful authentication
+                const isSuccess = Math.random() > 0.2;
+                
+                if (isSuccess) {
+                    // Enable buttons
+                    checkInBtn.disabled = false;
+                    checkOutBtn.disabled = false;
+                    
+                    // Show success message
+                    alert('Fingerprint recognized! You can now check in or out.');
+                } else {
+                    // Show error message
+                    alert('Fingerprint not recognized. Please try again.');
+                }
+            }, 2000);
+        }
+
+        // Check in function
+        function checkIn() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
+            
+            // Update check-in time on dashboard
+            document.querySelectorAll('.info-value')[2].textContent = timeString.replace(' AM', '').replace(' PM', '');
+            
+            // Disable check-in button, enable check-out
+            checkInBtn.disabled = true;
+            checkOutBtn.disabled = false;
+            
+            // Show success message
+            alert(`Checked in at ${timeString}`);
+        }
+
+        // Check out function
+        function checkOut() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
+            
+            // Update check-out time on dashboard
+            document.querySelectorAll('.info-value')[3].textContent = timeString.replace(' AM', '').replace(' PM', '');
+            
+            // Calculate and update hours
+            const checkInTime = "9:00"; // In a real app, you would get this from storage
+            const checkOutTime = timeString.replace(' AM', '').replace(' PM', '');
+            
+            // Calculate total hours (simplified)
+            const totalHours = (parseInt(checkOutTime.split(':')[0]) + parseInt(checkOutTime.split(':')[1])/60) - 
+                              (parseInt(checkInTime.split(':')[0]) + parseInt(checkInTime.split(':')[1])/60);
+            
+            const overtime = Math.max(0, totalHours - 8.5);
+            
+            document.querySelectorAll('.info-value')[0].textContent = totalHours.toFixed(1);
+            document.querySelectorAll('.info-value')[1].textContent = overtime.toFixed(1);
+            
+            // Disable buttons
+            checkInBtn.disabled = true;
+            checkOutBtn.disabled = true;
+            
+            // Show success message
+            alert(`Checked out at ${timeString}. Total hours: ${totalHours.toFixed(1)} (Overtime: ${overtime.toFixed(1)})`);
+        }
+
+        // Render employees
+        function renderEmployees() {
+            employeeGrid.innerHTML = '';
+            
+            employees.forEach(employee => {
+                const employeeCard = document.createElement('div');
+                employeeCard.className = 'employee-card';
+                employeeCard.innerHTML = `
+                    <div class="employee-header">
+                        <div class="employee-avatar">${employee.initials}</div>
+                        <div class="employee-info">
+                            <h3>${employee.name}</h3>
+                            <div class="employee-id">${employee.employeeId}</div>
+                        </div>
+                    </div>
+                    <div class="employee-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Position</div>
+                            <div>${employee.position}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Department</div>
+                            <div>${employee.department}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Email</div>
+                            <div>${employee.email}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Phone</div>
+                            <div>${employee.phone}</div>
+                        </div>
+                    </div>
+                    <div class="employee-actions">
+                        <button class="action-btn edit-btn" data-id="${employee.id}">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="action-btn delete-btn" data-id="${employee.id}">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                `;
+                
+                employeeGrid.appendChild(employeeCard);
+            });
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.closest('.delete-btn').getAttribute('data-id');
+                    showDeleteModal(parseInt(id));
+                });
+            });
+        }
+
+        // Show delete confirmation modal
+        function showDeleteModal(employeeId) {
+            const employee = employees.find(emp => emp.id === employeeId);
+            if (employee) {
+                employeeToDelete = employeeId;
+                deleteMessage.textContent = `Are you sure you want to delete ${employee.name} (${employee.employeeId})? This action cannot be undone.`;
+                deleteModal.style.display = 'flex';
+            }
+        }
+
+        // Set up modal events
+        function setupModal() {
+            cancelDelete.addEventListener('click', () => {
+                deleteModal.style.display = 'none';
+                employeeToDelete = null;
+            });
+            
+            confirmDelete.addEventListener('click', () => {
+                if (employeeToDelete !== null) {
+                    // In a real app, you would make an API call to delete the employee
+                    const index = employees.findIndex(emp => emp.id === employeeToDelete);
+                    if (index !== -1) {
+                        employees.splice(index, 1);
+                        renderEmployees();
+                    }
+                    deleteModal.style.display = 'none';
+                    employeeToDelete = null;
+                    alert('Employee deleted successfully.');
+                }
+            });
+            
+            // Close modal when clicking outside the content
+            deleteModal.addEventListener('click', (e) => {
+                if (e.target === deleteModal) {
+                    deleteModal.style.display = 'none';
+                    employeeToDelete = null;
+                }
+            });
+        }
+
+        // Initialize the app when the page loads
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
